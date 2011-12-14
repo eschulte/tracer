@@ -31,12 +31,12 @@ int main(int argc, char *argv[]){
       wait(&status);
       if(WIFEXITED(status)) break;
       ptrace(PTRACE_GETREGS, child, NULL, &regs);
-      // ins = ptrace(PTRACE_PEEKTEXT, child, regs.rip, NULL);
-      // printf("0x%lx 0x%lx\n", regs.rip, ins);
-      printf("0x%lx\n", regs.rip);
+      // ins = ptrace(PTRACE_PEEKTEXT, child, regs.eip, NULL);
+      // printf("0x%lx 0x%lx\n", regs.eip, ins);
+      printf("0x%lx\n", regs.eip);
       ptrace(PTRACE_SINGLESTEP, child, NULL, NULL);
     }
+    return status;
     break;
   }
-  return 0;
 }
