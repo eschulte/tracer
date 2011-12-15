@@ -6,7 +6,7 @@ all: tracer hello
 hello: hello.c
 	$(CC) -o hello hello.c
 
-tracer: tracer-$(ARCH).c
+tracer: tracer-$(ARCH).c libelf.c libelf.h
 	$(CC) -static -o tracer tracer-$(ARCH).c libelf.c
 
 clean:
