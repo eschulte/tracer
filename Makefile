@@ -13,4 +13,4 @@ clean:
 	rm -f hello tracer
 
 check: hello tracer
-	./tracer ./hello |sort -n|uniq|less
+	time ./tracer ./hello
