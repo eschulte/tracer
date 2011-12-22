@@ -14,7 +14,6 @@ int main(int argc, char *argv[]){
   int begin = get_text_address(argv[1]);
   int end   = begin + get_text_offset(argv[1]);
   long ins;
-  child = fork();
 
   switch (child=fork()){
   case -1: // error
