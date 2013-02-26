@@ -18,8 +18,7 @@ int main(int argc, char *argv[]){
      (argv[1][0] == '-' && argv[1][1] == 'h') ||
      (argv[1][0] == '-' && argv[1][1] == '-' && argv[1][2] == 'h')){
     printf("Usage: tracer [program] [args...]\n"
-           "Run PROGRAM on ARGS recording the memory address of each executed\n"
-           "assembly instruction to the file 'trace'.\n");
+           "Run PROGRAM on ARGS printing the values of the program counter.\n");
     return 0; }
 
   /* get on with it */
