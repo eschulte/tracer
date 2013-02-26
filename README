@@ -1,1 +1,37 @@
 simple ptrace-based program execution tracer
+
+    $ tracer -h
+    Usage: tracer [program] [args...]
+    Run PROGRAM on ARGS printing the values of the program counter.
+
+Trace the executed memory addresses in order.
+
+    $ tracer ./hello|head
+    4195344
+    4195346
+    4195349
+    4195350
+    4195353
+    4195357
+    4195358
+    4195359
+    4195366
+    4195373
+
+Disassemble the executable and collect trace data by instruction.
+Format used is "address #evaluations disassembly...".
+
+    $ tracer-w-disasm ./hello|grep -C 4 " 10"
+    400504  1    movl    $0x0,-0x4(%rbp)
+    40050b  1    movl    $0x0,-0x8(%rbp)
+    400512  1    movl    $0x0,-0x4(%rbp)
+    400519  1    jmp     0000000000400525
+    40051b  100  mov     -0x4(%rbp),%eax
+    40051e  100  mov     %eax,-0x8(%rbp)
+    400521  100  addl    $0x1,-0x4(%rbp)
+    400525  101  cmpl    $0x63,-0x4(%rbp)
+    400529  101  jle     000000000040051b
+    40052b  1    mov     $0x4005e4,%edi
+    400530  1    callq   00000000004003e0
+    400535  1    leaveq
+    400536  1    retq
