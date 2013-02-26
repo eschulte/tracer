@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
     return 0; }
 
   /* get on with it */
-  fd    = fopen("trace", "a");
+  fd    = stdout;
   begin = get_text_address(argv[1]);
   end   = begin + get_text_offset(argv[1]);
   switch (child=fork()){
@@ -33,6 +33,7 @@ int main(int argc, char *argv[]){
     break;
   case 0:  // child
     ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+    freopen("/dev/null", "a", stdout); // don't let child print to STDOUT
     execvp(argv[1], &argv[1]);
     break;
   default: // parent
