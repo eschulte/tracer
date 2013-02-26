@@ -1,18 +1,21 @@
-CC=gcc
-CFLAGS=-static -Ofast
 ARCH=$(shell getconf LONG_BIT)
+ifeq ($(ARCH),64)
+PC_REG:=rip
+endif
+ifeq ($(ARCH),32)
+PC_REG:=eip
+endif
+CC=gcc
+CFLAGS=-static -Ofast -D PC_REG=$(PC_REG)
 
-all: tracer hello
+all: tracer
 
-hello: hello.c
-	$(CC) -o hello hello.c
-
-tracer: tracer-$(ARCH).c libelf.c
-	$(CC) -o $@ $(CFLAGS) tracer-$(ARCH).c libelf.c
+tracer: tracer.c libelf.c
+	$(CC) -o $@ $(CFLAGS) $^
 	strip -s $@
 
 clean:
 	rm -f hello tracer
 
 check: hello tracer
-	time ./tracer ./hello
+	./tracer ./hello

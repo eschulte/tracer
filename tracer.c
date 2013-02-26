@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
       ptrace(PTRACE_GETREGS, child, NULL, &regs);
       // ins = ptrace(PTRACE_PEEKTEXT, child, regs.rip, NULL);
       // fprintf(fd, "0x%lx 0x%lx\n", regs.rip, ins);
-      if ((begin <= regs.rip) && (end >= regs.rip))
+      if ((begin <= regs.PC_REG) && (end >= regs.PC_REG))
         fprintf(fd, "%d\n", regs.rip);
       ptrace(PTRACE_SINGLESTEP, child, NULL, NULL);
     }
