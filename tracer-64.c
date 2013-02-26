@@ -14,7 +14,9 @@ int main(int argc, char *argv[]){
   long ins;
 
   /* check for help flag */
-  if(argc > 1 && argv[1][0] == '-' && argv[1][1] == 'h'){
+  if(argc <= 1 ||
+     (argv[1][0] == '-' && argv[1][1] == 'h') ||
+     (argv[1][0] == '-' && argv[1][1] == '-' && argv[1][2] == 'h')){
     printf("Usage: tracer [program] [args...]\n"
            "Run PROGRAM on ARGS recording the memory address of each executed\n"
            "assembly instruction to the file 'trace'.\n");
