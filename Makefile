@@ -1,4 +1,5 @@
 CC=gcc
+CFLAGS=-static -Ofast
 ARCH=$(shell getconf LONG_BIT)
 
 all: tracer hello
@@ -6,8 +7,9 @@ all: tracer hello
 hello: hello.c
 	$(CC) -o hello hello.c
 
-tracer: tracer-$(ARCH).c libelf.c libelf.h
-	$(CC) -static -o tracer tracer-$(ARCH).c libelf.c
+tracer: tracer-$(ARCH).c libelf.c
+	$(CC) -o $@ $(CFLAGS) tracer-$(ARCH).c libelf.c
+	strip -s $@
 
 clean:
 	rm -f hello tracer
