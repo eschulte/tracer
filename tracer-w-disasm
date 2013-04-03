@@ -15,4 +15,4 @@ mem_addrs(){
         |egrep "^[a-f0-9]+ "|sed 's/^0*//'|awk '{print $1, $3, $4}'; }
 
 join <(tracer $@|sort|uniq -c|sort -n|awk '{printf "%x %d\n", $2, $1}'|sort) \
-     <(mem_addrs $PROGRAM|sort)|column -t
+     <(mem_addrs $PROGRAM|sort)|awk 'OFS="	" {print $1,$2,$3,$4}'
