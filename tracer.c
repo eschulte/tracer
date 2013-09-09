@@ -1,30 +1,46 @@
+#include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
 #include <sys/user.h>
 #include "libelf.h"
 
 int main(int argc, char *argv[]){
-  FILE * fd;
-  int status, begin, end;
+  FILE * fd = stdout;
+  int status, begin, end, c;
   pid_t child;
   struct user_regs_struct regs;
   long ins;
 
-  /* check for help flag */
-  if(argc <= 1 ||
-     (argv[1][0] == '-' && argv[1][1] == 'h') ||
-     (argv[1][0] == '-' && argv[1][1] == '-' && argv[1][2] == 'h')){
-    printf("Usage: tracer [program] [args...]\n"
-           "Run PROGRAM on ARGS printing the values of the program counter.\n");
-    return 0; }
+  /* parse command line options */
+  while ((c = getopt(argc, argv, "ho:")) != -1)
+    switch(c)
+      {
+      case 'h':
+        fprintf(stderr,
+                "Usage: tracer [-o FILE] PROGRAM [ARG...]\n"
+                "Run PROGRAM on ARGs printing each value of the program\n"
+                "counter to FILE or to STDOUT if FILE is not specified.\n");
+        return 1;
+      case 'o':
+        fd = fopen(argv[2], "w");
+        break;
+      default:
+        abort();
+      }
+
+  /* ensure the file exists */
+  if(access(argv[optind], F_OK) == -1){
+    fprintf(stderr,"program file `%s' does not exist.\n", argv[optind]);
+    return 1;
+  }
 
   /* get on with it */
-  fd    = stdout;
-  begin = get_text_address(argv[1]);
-  end   = begin + get_text_offset(argv[1]);
+  begin = get_text_address(argv[optind]);
+  end   = begin + get_text_offset(argv[optind]);
   switch (child=fork()){
   case -1: // error
     printf("fork error\n");
@@ -32,8 +48,10 @@ int main(int argc, char *argv[]){
     break;
   case 0:  // child
     ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-    freopen("/dev/null", "a", stdout); // don't let child print to STDOUT
-    execvp(argv[1], &argv[1]);
+    // don't let child print to STDOUT if we're writing to STDOUT
+    if (fd == stdout)
+      freopen("/dev/null", "a", stdout);
+    execvp(argv[optind], &argv[optind]);
     break;
   default: // parent
     while(1) {
