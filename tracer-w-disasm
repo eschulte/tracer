@@ -1,7 +1,30 @@
 #!/bin/bash
 #
-# Show disassembed code along side tracer output
-#
+# Usage: tracer-w-disasm [-o FILE] PROGRAM [ARG...]
+# print disassembed code along side tracer output
+OUTPUT=""
+TMP=$(mktemp)
+function exit_hook(){ rm -f $TMP; }
+trap exit_hook EXIT
+help(){
+    cat "$0" \
+        |sed '/^[^#]/q' \
+        |head -n -1 \
+        |tail -n +3 \
+        |sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' \
+        |cut -c3-
+    exit 1; }
+eval set -- $(getopt -o ho: -l help,output: -- "$@" || help;)
+while [ $# -gt 0 ];do
+    case $1 in
+        -h|--help) help;;
+        -o|--output) OUTPUT="$2"; shift;;
+        (--) shift; break;;
+        (-*) error "unrecognized option $1";;
+        (*)  break;;
+    esac
+    shift
+done
 PROGRAM=$1
 
 mem_addrs(){
@@ -14,5 +37,22 @@ mem_addrs(){
         |xargs -I{} objdump -S -j {} --prefix-addresses $prog \
         |egrep "^[a-f0-9]+ "|sed 's/^0*//'|awk '{print $1, $3, $4}'; }
 
-join <(tracer $@|sort|uniq -c|sort -n|awk '{printf "%x %d\n", $2, $1}'|sort) \
-     <(mem_addrs $PROGRAM|sort)|awk 'OFS="	" {print $1,$2,$3,$4}'
+trace(){
+    if [ -z $OUTPUT ];then
+        tracer $@;
+    else
+        tracer -o $OUTPUT $@ >$TMP
+    fi; }
+
+joined(){
+    join \
+        <(trace $@|sort|uniq -c|sort -n|awk '{printf "%x %d\n", $2, $1}'|sort) \
+        <(mem_addrs $PROGRAM|sort)|awk '{printf "%s\t%s\t%s %s\n", $1,$2,$3,$4}'
+}
+
+if [ -z $OUTPUT ];then
+    joined $@
+else
+    joined $@ > $OUTPUT
+    cat $TMP
+fi
